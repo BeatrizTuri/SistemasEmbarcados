@@ -5,5 +5,5 @@ Sistemas embarcados são dispositivos computacionais projetados para desempenhar
 
 ## 👥 Integrantes
 - Beatriz Turi Pinto de Araujo - [LinkedIn](https://linkedin.com/in/beatrizturi)
-- Lucas Fernandes Mosqueira - [LinkedIn](https://linkedin.com/in/lucasjserejo)
-- Lucas José Silva Serejo - [LinkedIn](https://linkedin.com/in/lucas-fernandes-mosqueira)
+- Lucas Fernandes Mosqueira - [LinkedIn](https://linkedin.com/in/lucas-fernandes-mosqueira)
+- Lucas José Silva Serejo - [LinkedIn](https://linkedin.com/in/lucasjserejo)
