@@ -1,28 +1,22 @@
-import network
+import paho.mqtt.client as mqtt
 import time
-from umqtt.simple import MQTTClient
+import random
 
-SSID = "Serejo"
-PASSWORD = "Serejolas"
+# Configurações do Broker
+broker = "test.mosquitto.org"
+topic = "iotbr/esp32"
 
-BROKER = "test.mosquitto.org"
-TOPIC = "iotbr/esp32"
+# Conectar ao Broker
+client = mqtt.Client()
+client.connect(broker, 1883, 60)
 
-sta_if = network.WLAN(network.STA_IF)
-sta_if.active(True)
-sta_if.connect(SSID, PASSWORD)
-
-while not sta_if.isconnected():
-    time.sleep(1)
-
-print("Conectado ao Wi-Fi")
-
-client = MQTTClient("esp32", BROKER)
-client.connect()
-
-while True:
-    sensor_value = 25.0 
-    client.publish(TOPIC, f"Temperatura: {sensor_value}°C")
-    print(f"Publicado: Temperatura: {sensor_value}°C")
-    time.sleep(10)
-""
+try:
+    while True:
+        temperatura = round(random.uniform(20.0, 30.0), 2)  # Simula uma temperatura entre 20 e 30°C
+        mensagem = f"Temperatura: {temperatura}°C"
+        client.publish(topic, mensagem)
+        print(f"Publicado: {mensagem}")
+        time.sleep(10)  # Espera 10 segundos antes de enviar novamente
+except KeyboardInterrupt:
+    print("Finalizando...")
+    client.disconnect()
