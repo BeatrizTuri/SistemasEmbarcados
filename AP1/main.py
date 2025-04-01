@@ -2,8 +2,8 @@ import paho.mqtt.client as mqtt
 import requests
 
 # Configurações do Telegram
-TELEGRAM_TOKEN = "7971761015:AAHrrcGHJJ3AmfrMX4RrVP7KygV5R1Ao6XI"
-CHAT_ID = "7525968418"
+TELEGRAM_TOKEN = ""
+CHAT_ID = ""
 
 # Configuração do MQTT
 MQTT_BROKER = "broker.mqtt-dashboard.com"
