@@ -5,26 +5,25 @@
 #include <PubSubClient.h>
 #include <DHT.h>
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define SCREEN_WIDTH 128 // Largura do display OLED, em pixels
+#define SCREEN_HEIGHT 64 // Altura do display OLED, em pixels
 
 // Configurações WiFi
 const char* ssid = "Theo";
 const char* password = "britney1603";
 
 // Configurações MQTT
-const char* mqtt_server = "mqtt.eclipseprojects.io"; // ou seu broker local
+const char* mqtt_server = "mqtt.eclipseprojects.io"; 
 const char* mqtt_alert_topic = "casa/alertas/temperatura";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+// Declaração para um display SSD1306 conectado ao I2C (pinos SDA, SCL)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-#define DHTPIN 4     // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT11 // DHT 11
-
+#define DHTPIN 4     
+#define DHTTYPE DHT11 
 DHT dht(DHTPIN, DHTTYPE);
 
 // Limites de temperatura
@@ -33,8 +32,8 @@ const float TEMP_MAX = 27.0;
 
 // Variáveis para controle de publicação
 unsigned long lastPublishTime = 0;
-const unsigned long publishInterval = 10000; // 10 segundos
-float lastTemp = -1; // Inicializa com um valor que não será atingido
+const unsigned long publishInterval = 10000; 
+float lastTemp = -1; 
 
 void setup_wifi() {
   delay(10);
@@ -92,7 +91,7 @@ void loop() {
     }
     client.loop();
 
-    // Read temperature and humidity from DHT sensor
+    // Lê temperatura e umidade do sensor DHT
     float t = dht.readTemperature();
     float h = dht.readHumidity();
 
@@ -111,16 +110,16 @@ void loop() {
       Serial.println(success ? "📡 Alerta MQTT publicado com sucesso!" : "⚠️ Falha ao publicar alerta MQTT");
 
 
-      lastTemp = t; // Atualiza o valor da temperatura
+      lastTemp = t; 
     }
 
-    lastPublishTime = currentTime; // Atualiza o tempo da última publicação
+    lastPublishTime = currentTime; 
   }
 
-  // Clear display
+
   display.clearDisplay();
 
-  // Display temperature
+  // Display temperatura
   display.setTextSize(1);
   display.setCursor(0, 0);
   display.print("Temperature: ");
@@ -134,7 +133,7 @@ void loop() {
   display.setTextSize(2);
   display.print("C");
 
-  // Display humidity
+  // Display humidade
   display.setTextSize(1);
   display.setCursor(0, 35);
   display.print("Humidity: ");
