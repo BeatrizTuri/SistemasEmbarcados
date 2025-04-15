@@ -13,8 +13,7 @@ const char* ssid = "Theo";
 const char* password = "britney1603";
 
 // Configurações MQTT
-const char* mqtt_server = "broker.mqtt-dashboard.com"; // ou seu broker local
-const char* mqtt_topic = "casa/sensor/temperatura";
+const char* mqtt_server = "mqtt.eclipseprojects.io"; // ou seu broker local
 const char* mqtt_alert_topic = "casa/alertas/temperatura";
 
 WiFiClient espClient;
@@ -30,7 +29,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 // Limites de temperatura
 const float TEMP_MIN = 21.0;
-const float TEMP_MAX = 30.0;
+const float TEMP_MAX = 27.0;
 
 // Variáveis para controle de publicação
 unsigned long lastPublishTime = 0;
@@ -102,17 +101,15 @@ void loop() {
       return;
     }
 
-    // Publica dados normais
-    String payload = "{\"temperatura\":" + String(t) + ",\"umidade\":" + String(h) + "}";
-    client.publish(mqtt_topic, (uint8_t*)payload.c_str(), payload.length(), true);  // QoS é implicado aqui
-
     // Envia alertas somente quando a temperatura sair dos limites e mudar de estado
     if ((t > TEMP_MAX || t < TEMP_MIN) && t != lastTemp) {
       String alertMsg = "ALERTA: Temperatura ";
       alertMsg += (t > TEMP_MAX) ? "alta: " : "baixa: ";
-      alertMsg += String(t) + "°C";
+      alertMsg += String(t) + " °C";
 
-      client.publish(mqtt_alert_topic, (uint8_t*)alertMsg.c_str(), alertMsg.length(), true);  // QoS é implicado aqui
+      bool success = client.publish(mqtt_alert_topic, (uint8_t*)alertMsg.c_str(), alertMsg.length());
+      Serial.println(success ? "📡 Alerta MQTT publicado com sucesso!" : "⚠️ Falha ao publicar alerta MQTT");
+
 
       lastTemp = t; // Atualiza o valor da temperatura
     }
