@@ -9,8 +9,8 @@
 #define SCREEN_HEIGHT 64 // Altura do display OLED, em pixels
 
 // Configurações WiFi
-const char* ssid = "Theo";
-const char* password = "britney1603";
+const char* ssid = "";
+const char* password = "";
 
 // Configurações MQTT
 const char* mqtt_server = "mqtt.eclipseprojects.io"; 
