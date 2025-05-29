@@ -1,39 +1,42 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
+#include <ArduinoJson.h>
 #include <Adafruit_SSD1306.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <DHT.h>
 
-#define SCREEN_WIDTH 128 // Largura do display OLED, em pixels
-#define SCREEN_HEIGHT 64 // Altura do display OLED, em pixels
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 // Configurações WiFi
 const char* ssid = "";
 const char* password = "";
 
 // Configurações MQTT
-const char* mqtt_server = "mqtt.eclipseprojects.io"; 
+const char* mqtt_server = "mqtt.eclipseprojects.io"; // ou seu broker local
 const char* mqtt_alert_topic = "casa/alertas/temperatura";
+const char* mqtt_analysis = "casa/metricas/esp32";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-// Declaração para um display SSD1306 conectado ao I2C (pinos SDA, SCL)
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-#define DHTPIN 4     
-#define DHTTYPE DHT11 
+#define DHTPIN 4     // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT11 // DHT 11
+
 DHT dht(DHTPIN, DHTTYPE);
 
 // Limites de temperatura
 const float TEMP_MIN = 21.0;
-const float TEMP_MAX = 27.0;
+const float TEMP_MAX = 25.0;
 
 // Variáveis para controle de publicação
 unsigned long lastPublishTime = 0;
-const unsigned long publishInterval = 10000; 
-float lastTemp = -1; 
+const unsigned long publishInterval = 10000; // 10 segundos
+float lastTemp = -1; // Inicializa com um valor que não será atingido
 
 void setup_wifi() {
   delay(10);
@@ -91,7 +94,7 @@ void loop() {
     }
     client.loop();
 
-    // Lê temperatura e umidade do sensor DHT
+    // Read temperature and humidity from DHT sensor
     float t = dht.readTemperature();
     float h = dht.readHumidity();
 
@@ -109,17 +112,29 @@ void loop() {
       bool success = client.publish(mqtt_alert_topic, (uint8_t*)alertMsg.c_str(), alertMsg.length());
       Serial.println(success ? "📡 Alerta MQTT publicado com sucesso!" : "⚠️ Falha ao publicar alerta MQTT");
 
+      // 🔍 Publica métrica de performance com timestamp separado (sem alterar o alerta)
+      StaticJsonDocument<128> perfJson;
+      perfJson["ts_esp32"] = millis();
+      perfJson["t"] = t;
+      perfJson["h"] = h;
 
-      lastTemp = t; 
+      char perfMsg[128];
+      serializeJson(perfJson, perfMsg);
+
+      // Publica em tópico separado apenas para análise
+      client.publish("casa/metricas/esp32", perfMsg);
+
+
+      lastTemp = t; // Atualiza o valor da temperatura
     }
 
-    lastPublishTime = currentTime; 
+    lastPublishTime = currentTime; // Atualiza o tempo da última publicação
   }
 
-
+  // Clear display
   display.clearDisplay();
 
-  // Display temperatura
+  // Display temperature
   display.setTextSize(1);
   display.setCursor(0, 0);
   display.print("Temperature: ");
@@ -133,7 +148,7 @@ void loop() {
   display.setTextSize(2);
   display.print("C");
 
-  // Display humidade
+  // Display humidity
   display.setTextSize(1);
   display.setCursor(0, 35);
   display.print("Humidity: ");

@@ -1,3 +1,4 @@
+import csv
 import paho.mqtt.client as mqtt
 import requests
 import time
@@ -11,6 +12,7 @@ BASE_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 # === Configuração do MQTT ===
 MQTT_BROKER = "mqtt.eclipseprojects.io"
 MQTT_TOPIC = "casa/alertas/temperatura"
+MQTT_TOPIC_METRICS = "casa/metricas/esp32"
 
 # === Arquivo para armazenar os chat_ids dos usuários ===
 USER_FILE = "users.json"
@@ -66,6 +68,36 @@ def on_message(client, userdata, message):
     print(f"📩 Alerta recebido via MQTT: {alert_msg}")
     send_telegram_message(alert_msg)
 
+
+
+# Função para salvar métricas de latência
+def salvar_latencia(latencia, ts_recebido):
+    file_exists = os.path.isfile("latencia_esp32_telegram.csv")
+    with open("latencia_esp32_telegram.csv", mode="a", newline="") as arquivo:
+        writer = csv.writer(arquivo)
+        if not file_exists:
+            writer.writerow(["timestamp_recebido", "latencia_segundos"])
+        writer.writerow([ts_recebido, latencia])
+
+# Callback para tópico de métricas
+def on_metrics_message(client, userdata, msg):
+    try:
+        payload = msg.payload.decode()
+        dados = json.loads(payload)
+
+        ts_esp32_millis = dados.get("ts_esp32", None)
+
+        if ts_esp32_millis is not None:
+            ts_recebido = time.time()  # timestamp real no Python (em segundos)
+            ts_esp32 = ts_esp32_millis / 1000.0  # converte millis para segundos
+
+            latencia = ts_recebido - ts_esp32
+
+            print(f"📊 Latência calculada: {latencia:.3f} segundos")
+            salvar_latencia(latencia, ts_recebido)
+    except Exception as e:
+        print(f"Erro ao processar métrica MQTT: {e}")
+
 # === Inicialização ===
 user_ids = load_user_ids()
 last_update_id = 0
@@ -74,6 +106,8 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.on_message = on_message
 client.connect(MQTT_BROKER, 1883)
 client.subscribe(MQTT_TOPIC)
+client.message_callback_add(MQTT_TOPIC_METRICS, on_metrics_message)
+client.subscribe(MQTT_TOPIC_METRICS)
 
 print("🤖 Bot iniciado. Aguardando mensagens MQTT e novos usuários...")
 
