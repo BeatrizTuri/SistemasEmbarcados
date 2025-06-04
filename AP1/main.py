@@ -6,7 +6,7 @@ import json
 import os
 
 # === Configurações do Telegram ===
-TELEGRAM_TOKEN = "7971761015:AAHrrcGHJJ3AmfrMX4RrVP7KygV5R1Ao6XI"
+TELEGRAM_TOKEN = ""
 BASE_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
 # === Configuração do MQTT ===

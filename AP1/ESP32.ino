@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <DHT.h>
+#include <time.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -75,12 +76,25 @@ void setup() {
   Serial.begin(115200);
   dht.begin();
   setup_wifi();
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+    // Aguarda sincronização com NTP
+  Serial.print("Aguardando sincronização NTP");
+  time_t now = time(nullptr);
+  while (now < 100000) { // valor baixo indica que ainda não sincronizou
+    delay(500);
+    Serial.print(".");
+    now = time(nullptr);
+  }
+  Serial.println("\n⏰ Tempo sincronizado: " + String(ctime(&now)));
+
   client.setServer(mqtt_server, 1883);
+
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;)
       ;
   }
+
   delay(2000);
   display.clearDisplay();
   display.setTextColor(WHITE);
@@ -114,7 +128,8 @@ void loop() {
 
       // 🔍 Publica métrica de performance com timestamp separado (sem alterar o alerta)
       StaticJsonDocument<128> perfJson;
-      perfJson["ts_esp32"] = millis();
+      perfJson["ts_esp32_millis"] = millis(); // Continua sendo útil
+      perfJson["ts_esp32_real"] = time(nullptr); // Timestamp absoluto UTC (em segundos)
       perfJson["t"] = t;
       perfJson["h"] = h;
 

@@ -35,9 +35,21 @@ while True:
 
                 st.subheader("📊 Métricas de Latência")
                 col1, col2, col3 = st.columns(3)
-                col1.metric("Erro Médio (ME)", f"{erro_medio:.3f} s")
-                col2.metric("Erro Quadrático Médio (MSE)", f"{erro_quad_medio:.3f} s²")
-                col3.metric("Raiz do Erro Quadrático Médio (RMSE)", f"{raiz_erro_quad_medio:.3f} s")
+                col1.metric(
+                    label="Erro Médio (ME)",
+                    value=f"{erro_medio:.3f} s",
+                    help="Média das latências medidas. Indica o desvio médio em relação à latência ideal (zero)."
+                )
+                col2.metric(
+                    label="Erro Quadrático Médio (MSE)",
+                    value=f"{erro_quad_medio:.3f} s²",
+                    help="Média dos quadrados dos erros. Penaliza mais os picos altos de latência."
+                )
+                col3.metric(
+                    label="Raiz do Erro Quadrático Médio (RMSE)",
+                    value=f"{raiz_erro_quad_medio:.3f} s",
+                    help="Raiz quadrada do MSE. Indica a latência média considerando a penalização de picos."
+                )
 
                 st.subheader("📈 Latência ao Longo do Tempo")
                 st.line_chart(df.sort_values("timestamp_recebido")[["latencia_segundos"]])
