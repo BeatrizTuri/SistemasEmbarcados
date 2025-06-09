@@ -4,8 +4,7 @@
 Sistemas embarcados são dispositivos computacionais projetados para desempenhar funções específicas dentro de um sistema maior. Eles estão presentes em diversas áreas, como automação industrial, eletrônicos de consumo, automóveis e dispositivos médicos.
 
 ## 📖 Sobre o Projeto
-
-Este projeto demonstra um sistema embarcado de monitoramento de temperatura e umidade utilizando ESP32, sensor DHT11, display OLED e comunicação via MQTT. Os dados coletados são enviados para um painel de monitoramento em tempo real e alertas são disparados via Telegram quando limites de temperatura são excedidos.
+Este projeto visa auxiliar a criação de estufas inteligentes por meio do monitoramento em tempo real da temperatura e umidade utilizando um ESP32, sensor DHT11, display OLED e comunicação via MQTT. Os dados coletados são exibidos localmente e enviados para um painel web, permitindo o acompanhamento remoto das condições ambientais. Além disso, o sistema dispara alertas automáticos via Telegram quando os limites de temperatura são excedidos, promovendo maior segurança e automação.
 
 ## 👥 Integrantes
 - Beatriz Turi Pinto de Araujo - [LinkedIn](https://linkedin.com/in/beatrizturi)
@@ -19,7 +18,28 @@ Este projeto demonstra um sistema embarcado de monitoramento de temperatura e um
 - **Envio de Dados via MQTT:** Publica métricas e alertas em tópicos específicos.
 - **Monitoramento em Tempo Real:** Painel web (Streamlit) exibe métricas, gráficos e estatísticas de latência.
 - **Alertas via Telegram:** Usuários podem se registrar para receber notificações automáticas.
-- **Registro de Latência:** Mede e armazena o tempo entre o envio do dado pelo ESP32 e o recebimento no servidor.
+- **Registro de Latência:** Mede e armazena o tempo entre o envio do dado pelo ESP32 e o recebimento no servidor e/ou envio ao Telegram.
+
+## 📖 Avaliação Quantitativa de Desempenho
+
+O sistema implementa duas métricas de latência para avaliação quantitativa do desempenho:
+
+- **Latência ESP32 → Servidor Python:**  
+  Mede o tempo entre o dado ser captado pelo ESP32 e o recebimento pelo backend Python via MQTT.  
+  - **Definição:** `latência = timestamp_recebido - timestamp_esp32`
+  - **Arquivo:** `latencia_esp32_server.csv`
+  - **Painel:** `metrics_eval.py`
+  - **Uso:** Avalia a eficiência da comunicação entre o dispositivo e o servidor.
+
+- **Latência ESP32 → Telegram:**  
+  Mede o tempo entre o dado ser captado pelo ESP32 e o envio da mensagem de alerta ao Telegram (após confirmação da API).  
+  - **Definição:** `latência = timestamp_envio_telegram - timestamp_esp32`
+  - **Arquivo:** `latencia_esp32_telegram.csv`
+  - **Painel:** `metrics_eval_2.py`
+  - **Uso:** Avalia o tempo total até o alerta ser encaminhado ao usuário via Telegram.
+
+> **Observação:**  
+> A latência ESP32 → Telegram não inclui o tempo até o usuário visualizar a mensagem, apenas até o envio ao Telegram.
 
 ## 🗂 Estrutura dos Arquivos
 
@@ -29,11 +49,17 @@ Este projeto demonstra um sistema embarcado de monitoramento de temperatura e um
 - `AP1/main.py`  
   Backend Python: recebe dados MQTT, envia alertas Telegram, registra métricas de latência.
 
+- `AP1/latencia_esp32_server.csv`  
+  Arquivo CSV com registros de latência do ESP32 até o servidor Python.
+
 - `AP1/latencia_esp32_telegram.csv`  
-  Arquivo CSV onde são salvos os registros de latência, temperatura e umidade.
+  Arquivo CSV com registros de latência do ESP32 até o envio ao Telegram.
 
 - `AP1/metrics_eval.py`  
-  Painel Streamlit para visualização em tempo real das métricas e gráficos.
+  Painel Streamlit para visualização em tempo real das métricas ESP32 → Servidor.
+
+- `AP1/metrics_eval_2.py`  
+  Painel Streamlit para visualização em tempo real das métricas ESP32 → Telegram.
 
 - `AP1/users.json`  
   Lista de usuários registrados para receber alertas no Telegram.
@@ -54,11 +80,14 @@ Este projeto demonstra um sistema embarcado de monitoramento de temperatura e um
 3. **Visualizar o Painel de Métricas**
    - Instale as dependências:  
      `pip install streamlit pandas numpy`
-   - Execute:  
+   - Execute para o painel ESP32 → Servidor:  
      `streamlit run metrics_eval.py`
+   - Execute para o painel ESP32 → Telegram:  
+     `streamlit run metrics_eval_2.py`
 
 4. **Receber Alertas no Telegram**
    - Inicie uma conversa com o bot do Telegram e envie qualquer mensagem para ser registrado.
+
 ---
 
 Projeto desenvolvido para a disciplina de Sistemas Embarcados.
