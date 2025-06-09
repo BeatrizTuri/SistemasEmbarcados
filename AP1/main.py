@@ -114,9 +114,10 @@ def on_metrics_message(client, userdata, msg):
                 f"[ALERTA]\n"
                 f"🌡 Temperatura: {t} °C \n"
                 f"💧 Umidade: {h} %\n\n"
-                f"Latência ESP32 → Servidor: {latencia_server:.3f} s\n"
                 f"⏱️ ESP32: {time.strftime('%H:%M:%S', time.localtime(ts_esp32_real))}\n"
-                f"⏱️ Recebido no Server: {time.strftime('%H:%M:%S', time.localtime(ts_recebido))}"
+                f"⏱️ Recebido no Servidor: {time.strftime('%H:%M:%S', time.localtime(ts_recebido))}\n"
+                f"📈Latência ESP32 → Servidor: {latencia_server:.3f} s"
+
             )
 
             send_telegram_message(

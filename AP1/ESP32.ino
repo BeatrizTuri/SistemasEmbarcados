@@ -16,7 +16,7 @@ const char* password = "";
 
 // Configurações MQTT
 const char* mqtt_server = "mqtt.eclipseprojects.io"; // ou seu broker local
-const char* mqtt_alert_topic = "casa/alertas/temperatura";
+// const char* mqtt_alert_topic = "casa/alertas/temperatura";
 const char* mqtt_analysis = "casa/metricas/esp32";
 
 WiFiClient espClient;
@@ -119,17 +119,11 @@ void loop() {
 
     // Envia alertas somente quando a temperatura sair dos limites e mudar de estado
     if ((t > TEMP_MAX || t < TEMP_MIN) && t != lastTemp) {
-      String alertMsg = "ALERTA: Temperatura ";
-      alertMsg += (t > TEMP_MAX) ? "alta: " : "baixa: ";
-      alertMsg += String(t) + " °C";
 
-      bool success = client.publish(mqtt_alert_topic, (uint8_t*)alertMsg.c_str(), alertMsg.length());
-      Serial.println(success ? "📡 Alerta MQTT publicado com sucesso!" : "⚠️ Falha ao publicar alerta MQTT");
-
-      // 🔍 Publica métrica de performance com timestamp separado (sem alterar o alerta)
+      // 🔍 Publica métrica de performance com timestamp separado
       StaticJsonDocument<128> perfJson;
-      perfJson["ts_esp32_millis"] = millis(); // Continua sendo útil
-      perfJson["ts_esp32_real"] = time(nullptr); // Timestamp absoluto UTC (em segundos)
+      perfJson["ts_esp32_millis"] = millis();
+      perfJson["ts_esp32_real"] = time(nullptr);
       perfJson["t"] = t;
       perfJson["h"] = h;
 
@@ -137,7 +131,8 @@ void loop() {
       serializeJson(perfJson, perfMsg);
 
       // Publica em tópico separado apenas para análise
-      client.publish("casa/metricas/esp32", perfMsg);
+      bool success = client.publish(mqtt_analysis, perfMsg);
+      Serial.println(success ? "📡 Métrica MQTT publicada com sucesso!" : "⚠️ Falha ao publicar métrica MQTT");
 
 
       lastTemp = t; // Atualiza o valor da temperatura
