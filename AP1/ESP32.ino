@@ -130,7 +130,7 @@ void loop() {
       char perfMsg[128];
       serializeJson(perfJson, perfMsg);
 
-      // Publica em tópico separado apenas para análise
+      
       bool success = client.publish(mqtt_analysis, perfMsg);
       Serial.println(success ? "📡 Métrica MQTT publicada com sucesso!" : "⚠️ Falha ao publicar métrica MQTT");
 
